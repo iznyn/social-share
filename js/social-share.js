@@ -32,6 +32,7 @@ window.social_share = null;
     windowWidth:    600,
     windowHeight:   400,
     countClass:     '.share-count',
+    googleApiKey:   'AIzaSyCBtrDzN1jp50dir_L4RbOLcecTEh8CNik'
   }
   
   /**
@@ -43,7 +44,9 @@ window.social_share = null;
   {
     'facebook':     'https://www.facebook.com/sharer/sharer.php',
     'twitter':      'https://www.twitter.com/share',
-    'googleplus':   'https://plus.google.com/share'
+    'googleplus':   'https://plus.google.com/share',
+    'pinterest':    'http://pinterest.com/pin/create/button',
+    'linkedin':     'https://www.linkedin.com/shareArticle',
   };
   
   /**
@@ -84,6 +87,12 @@ window.social_share = null;
     else if ( type == 'googleplus' ) {
       this.setupGoogleplus( element, url, title );
     }
+    else if ( type == 'pinterest' ) {
+      this.setupPinterest( element, url, title );
+    }
+    else if ( type == 'linkedin' ) {
+      this.setupLinkedin( element, url, title );
+    }
   }
     
   /**
@@ -117,7 +126,7 @@ window.social_share = null;
   {
     var shareUrl = this.getShareUrl( 'twitter' )
                     + '?url=' + url
-                    + '&title=' + title;
+                    + '&text=' + title;
   
     this.setupShare( element, shareUrl, 'twitter' );
   }
@@ -138,6 +147,47 @@ window.social_share = null;
                     + '&title=' + title;
                     
     this.setupShare( element, shareUrl, 'googleplus' );
+  }
+    
+  /**
+   * Setup pinterest share button 
+   *
+   * @var function
+   * @param object element
+   * @param string url
+   * @param string title
+   * @return void
+   */
+  construct.prototype.setupPinterest = function( element, url, title )
+  {
+    var media    = element.getAttribute( 'data-media' );
+    var shareUrl = this.getShareUrl( 'pinterest' )
+                    + '?url=' + url
+                    + '&media=' + media
+                    + '&description=' + title;
+                    
+    this.setupShare( element, shareUrl, 'pinterest' );
+  }
+    
+  /**
+   * Setup linkedin share button 
+   *
+   * @var function
+   * @param object element
+   * @param string url
+   * @param string title
+   * @return void
+   */
+  construct.prototype.setupLinkedin = function( element, url, title )
+  {
+    var summary  = element.getAttribute( 'data-summary' );
+    var shareUrl = this.getShareUrl( 'linkedin' )
+                    + '?mini=true'
+                    + '&url=' + url
+                    + '&title=' + title
+                    + '&summary=' + summary;
+                    
+    this.setupShare( element, shareUrl, 'linkedin' );
   }
     
   /**
@@ -233,6 +283,10 @@ window.social_share = null;
         this.changeShareCountTwitter( element, pageUrl );
       } else if ( callback == 'googleplus' ) {
         this.changeShareCountGoogleplus( element, pageUrl );
+      } else if ( callback == 'pinterest' ) {
+        this.changeShareCountPinterest( element, pageUrl );
+      } else if ( callback == 'linkedin' ) {
+        this.changeShareCountLinkedin( element, pageUrl );
       }
     }
     else if ( typeof callback === 'function' ) {
@@ -327,8 +381,8 @@ window.social_share = null;
     var $this = this;
     var count = 0;
         
-    //Make request to get facebook share count 
-    var apikey     = 'AIzaSyCBtrDzN1jp50dir_L4RbOLcecTEh8CNik'; 
+    //Make request to get google plus share count 
+    var apikey     = $this.vars.googleApiKey; 
     var requestUrl = 'https://clients6.google.com/rpc?key=' + apikey;
     
     if ( typeof jQuery !== 'undefined' )
@@ -358,6 +412,80 @@ window.social_share = null;
           $this.changeShareCountInfo( element, count );
         }
       );
+    }
+  }
+    
+  /**
+   * Change share count pinterest
+   *
+   * @var function
+   * @param object element
+   * @param string pageUrl
+   * @return int
+   */
+  construct.prototype.changeShareCountPinterest = function( element, pageUrl )
+  {
+    var $this = this;
+    var count = 0;
+    
+    //Make request to get pinterest share count 
+    var requestUrl = 'http://api.pinterest.com/v1/urls/count.json?callback=?&url=' + pageUrl;
+    
+    if ( typeof jQuery !== 'undefined' )
+    {
+      jQuery.ajax({
+        type: 'GET',
+        url: requestUrl,
+        async: false,
+        contentType: "application/json",
+        dataType: 'jsonp',
+        success: function(json) 
+        {
+          if ( typeof json.count !== 'undefined' ) {
+            count = json.count;
+          }
+          
+          //Change count
+          $this.changeShareCountInfo( element, count );
+        },
+      });
+    }
+  }
+    
+  /**
+   * Change share count linkedin
+   *
+   * @var function
+   * @param object element
+   * @param string pageUrl
+   * @return int
+   */
+  construct.prototype.changeShareCountLinkedin = function( element, pageUrl )
+  {
+    var $this = this;
+    var count = 0;
+    
+    //Make request to get linkedin share count 
+    var requestUrl = 'http://www.linkedin.com/countserv/count/share?format=jsonp&url=' + pageUrl;
+    
+    if ( typeof jQuery !== 'undefined' )
+    {
+      jQuery.ajax({
+        type: 'GET',
+        url: requestUrl,
+        async: false,
+        contentType: "application/json",
+        dataType: 'jsonp',
+        success: function(json) 
+        {
+          if ( typeof json.count !== 'undefined' ) {
+            count = json.count;
+          }
+          
+          //Change count
+          $this.changeShareCountInfo( element, count );
+        },
+      });
     }
   }
     

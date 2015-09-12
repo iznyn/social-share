@@ -7,9 +7,11 @@
 (function(){
   "use strict";
   
-  var button = document.querySelector( '.social-share-button' );
-  var share  = new window.social_share();
-  
-  share.setup( button );
+  jQuery( '.social-share-button' ).each( function()
+  {
+    var button = jQuery(this)[0];
+    var share  = new window.social_share();
+    share.setup( button );
+  });
   
 })();
